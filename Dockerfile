@@ -10,5 +10,6 @@ COPY . .
 
 RUN yarn --pure-lockfile
 
-
 CMD [ "node", "src/index.js" ]
+
+
