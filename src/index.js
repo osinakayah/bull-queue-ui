@@ -1,27 +1,28 @@
 const express = require('express');
-const Queue = require('bull');
+const { Queue } = require('bullmq');
 const { createBullBoard } = require('@bull-board/api');
-const { BullAdapter } = require('@bull-board/api/bullAdapter');
+const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
 
-const redis = {
+const redisConnection = {
     port: process.env.REDIS_PORT,
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD
 }
 const queueNames = process.env.QUEUES.split(',')
-const queueObjects = queueNames.map((queueName)=>{
-    return new Queue(queueName, {
-        redis: redis,
-    })
-});
 
-const bullAdapters = queueObjects.map((queueObject)=>{
-    return new BullAdapter(queueObject)
+const queueMqObjects = queueNames.map((queueName)=>{
+    return new Queue(queueName, {
+        connection: redisConnection,
+    })
 });
 
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
+
+const bullAdapters = queueMqObjects.map((queueMqObject)=>{
+    return new BullMQAdapter(queueMqObject)
+});
 
 createBullBoard({
     queues: bullAdapters,
@@ -36,4 +37,5 @@ app.use('/admin/queues', serverAdapter.getRouter());
 
 app.listen(3002, () => {
     console.log('Running on 3002...');
+    console.log('For the UI, open http://localhost:3002/admin/queues');
 });

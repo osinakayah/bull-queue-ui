@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-WORKDIR /var/www/bull-ui
+WORKDIR /var/www/bullmq-ui
 
 COPY package.json ./
 COPY yarn.lock ./
